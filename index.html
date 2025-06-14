@@ -1,0 +1,147 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>ToDoList</title>
+    <link rel="stylesheet" href="/style.css" />
+  </head>
+  <body>
+    <div class="container">
+      <div class="input-container">
+        <h1>My To Do List</h1>
+        <input type="text" placeholder="Add new task..." id="inputTask" />
+        <input type="button" value="Add" id="addBtn" />
+      </div>
+      <ul class="todolist" id="todoList"></ul>
+    </div>
+
+    <script>
+      const inputTask = document.getElementById("inputTask");
+      const addBtn = document.getElementById("addBtn");
+      const todoList = document.getElementById("todoList");
+
+      let editTodo = null;
+
+      //function to add todo
+      const addToDo = () => {
+        const inputText = inputTask.value.trim();
+
+        if (inputText.length <= 0) {
+          alert("You must enter some todo...!");
+          return false;
+        }
+    
+        if (addBtn.value === "Save") {
+          editLocalTodos(editTodo.target.previousElementSibling.innerHTML);
+          editTodo.target.previousElementSibling.innerHTML = inputText;
+          addBtn.value = "Add";
+          inputTask.value = "";
+          return false;
+        }
+
+        const li = document.createElement("li");
+        const p = document.createElement("p");
+
+        p.innerHTML = inputText;
+        li.appendChild(p);
+        todoList.appendChild(li);
+        inputTask.value = "";
+
+        const editBtn = document.createElement("button");
+        editBtn.innerText = "Edit";
+        editBtn.classList.add("btn");
+        li.appendChild(editBtn);
+
+        const deltBtn = document.createElement("button");
+        deltBtn.innerText = "Delete";
+        deltBtn.classList.add("btn");
+        li.appendChild(deltBtn);
+
+        saveLocalTodos(inputText);
+      };
+
+      //function to edit todo(edit,delete actions)
+      const updateTodo = (e) => {
+        //e.target.innerHTML (here gives the elements like delete,edit,taskname..)
+        if (e.target.innerHTML === "Edit") {
+          inputTask.value = e.target.previousElementSibling.innerHTML;
+          inputTask.focus();
+          addBtn.value = "Save";
+          editTodo = e;
+        }
+        if (e.target.innerHTML === "Delete") {
+          todoList.removeChild(e.target.parentElement);
+          deleteLocalTodo(e.target.parentElement);
+        }
+      };
+
+      //Save local todo
+      const saveLocalTodos = (todo) => {
+        let todos;
+        if (localStorage.getItem("todos") === null) {
+          todos = [];
+        } else {
+          todos = JSON.parse(localStorage.getItem("todos"));
+        }
+        todos.push(todo);
+        // console.log(todos);
+        localStorage.setItem("todos", JSON.stringify(todos));
+      };
+
+      //get local todo
+      const getLocalTodos = () => {
+        let todos;
+        if (localStorage.getItem("todos") === null) {
+          todos = [];
+        } else {
+          todos = JSON.parse(localStorage.getItem("todos"));
+          todos.forEach((todo) => {
+            const li = document.createElement("li");
+            const p = document.createElement("p");
+            p.innerHTML = todo;
+            li.appendChild(p);
+
+            const editBtn = document.createElement("button");
+            editBtn.innerText = "Edit";
+            editBtn.classList.add("btn");
+            li.appendChild(editBtn);
+
+            const deltBtn = document.createElement("button");
+            deltBtn.innerText = "Delete";
+            deltBtn.classList.add("btn");
+            li.appendChild(deltBtn);
+
+            todoList.appendChild(li);
+          });
+        }
+      };
+
+      //delete local todo
+      const deleteLocalTodo = (todo) => {
+        let todos;
+        if (localStorage.getItem("todos") === null) {
+          todos = [];
+        } else {
+          todos = JSON.parse(localStorage.getItem("todos"));
+        }
+        let todoText = todo.children[0].innerHTML;
+        let todoIndex = todos.indexOf(todoText);
+        todos.splice(todoIndex, 1);
+        localStorage.setItem("todos", JSON.stringify(todos));
+      };
+
+      const editLocalTodos = (todo) => {
+        let todos = JSON.parse(localStorage.getItem("todos"));
+        let todoIndex = todos.indexOf(todo);
+        todos[todoIndex] = inputTask.value;
+        localStorage.setItem("todos", JSON.stringify(todos));
+      };
+
+      document.addEventListener("DOMContentLoaded", getLocalTodos);
+      addBtn.addEventListener("click", addToDo);
+      todoList.addEventListener("click", updateTodo);
+
+    </script>
+  </body>
+</html>
